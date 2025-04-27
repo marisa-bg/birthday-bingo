@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="bg">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Парти Бинго</title>
+  <style>
+    body {
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      background: #ffe5ec;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    h1 {
+      color: #ff69b4;
+    }
+
+    #bingo {
+      display: grid;
+      grid-template-columns: repeat(5, 100px);
+      grid-gap: 5px;
+      margin-top: 20px;
+    }
+
+    .cell {
+      background: #fff0f5;
+      border: 2px solid #ff69b4;
+      height: 100px;
+      width: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.3s, transform 0.2s;
+    }
+
+    .cell:hover {
+      transform: scale(1.05);
+    }
+
+    .cell.marked {
+      background: #ff69b4;
+      color: white;
+      font-weight: bold;
+    }
+
+    button {
+      margin-top: 10px;
+      background-color: #ff69b4;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    #buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    #message {
+      margin-top: 15px;
+      font-size: 20px;
+      color: green;
+      font-weight: bold;
+      animation: none;
+    }
+
+    @keyframes party {
+      0% {
+        color: red;
+      }
+
+      25% {
+        color: orange;
+      }
+
+      50% {
+        color: yellow;
+      }
+
+      75% {
+        color: green;
+      }
+
+      100% {
+        color: blue;
+      }
+    }
+
+    /* Стилизиране само за печат */
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+
+      #bingo {
+        visibility: visible;
+        position: absolute;
+        top: 50px;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1 id="title">Парти Бинго 🎉</h1>
+  <div id="bingo"></div>
+
+  <div id="buttons">
+    <button onclick="generateBingo()">Ново бинго</button>
+    <button onclick="printBingo()">Принтирай бинго</button>
+  </div>
+
+  <div id="message"></div>
+
+  <script>
+    const phrases = [
+      "Балон се спука",
+      "Някой духна свещите",
+      "Подарък със синя хартия",
+      "Дете плаче",
+      "Някой се намаза с торта",
+      "Чашата се обърна",
+      "Шапка пада от глава",
+      "Изпяха 'ЧРД'",
+      "Куче лае",
+      "Танцуващ възрастен",
+      "Фото със селфи стик",
+      "Някой закъснява",
+      "Губи се подарък",
+      "Дядо танцува",
+      "Торта с много свещички",
+      "Конфети във въздуха",
+      "Някой се спъва",
+      "Изненадващ подарък",
+      "Гости пеят силно",
+      "Балон лети нагоре",
+      "Сладка бъркотия",
+      "Костюм на супергерой",
+      "Някой носи подарък",
+      "Детски смях",
+      "Викане за подаръци"
+    ];
+
+    function generateBingo() {
+      const bingo = document.getElementById('bingo');
+      bingo.innerHTML = "";
+      document.getElementById('message').textContent = "";
+      document.getElementById('message').style.animation = "none";
+
+      let shuffled = phrases.sort(() => 0.5 - Math.random()).slice(0, 25);
+
+      shuffled.forEach((text, index) => {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        cell.textContent = text;
+        cell.dataset.index = index;
+        cell.onclick = () => {
+          cell.classList.toggle('marked');
+          checkBingo();
+        };
+        bingo.appendChild(cell);
+      });
+    }
+
+    function checkBingo() {
+      const cells = document.querySelectorAll('.cell');
+      const marked = Array.from(cells).map(cell => cell.classList.contains('marked'));
+
+      const lines = [
+        // Хоризонтали
+        [0, 1, 2, 3, 4],
+        [5, 6, 7, 8, 9],
+        [10, 11, 12, 13, 14],
+        [15, 16, 17, 18, 19],
+        [20, 21, 22, 23, 24],
+        // Вертикали
+        [0, 5, 10, 15, 20],
+        [1, 6, 11, 16, 21],
+        [2, 7, 12, 17, 22],
+        [3, 8, 13, 18, 23],
+        [4, 9, 14, 19, 24],
+        // Диагонали
+        [0, 6, 12, 18, 24],
+        [4, 8, 12, 16, 20]
+      ];
+
+      let bingoFound = lines.some(line => line.every(index => marked[index]));
+
+      if (bingoFound) {
+        const message = document.getElementById('message');
+        message.textContent = "БИНГО! 🎉";
+        message.style.animation = "party 1s infinite";
+      } else {
+        const message = document.getElementById('message');
+        message.textContent = "";
+        message.style.animation = "none";
+      }
+    }
+
+    function printBingo() {
+      window.print();
+    }
+
+    generateBingo();
+  </script>
+
+</body>
+
+</html>
