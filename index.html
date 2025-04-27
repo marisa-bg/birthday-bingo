@@ -55,6 +55,23 @@
       font-weight: bold;
     }
 
+    .logo-cell {
+      background: #fff0f5;
+      border: 2px solid #ff69b4;
+      height: 100px;
+      width: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .logo-cell img {
+      max-width: 90%;
+      max-height: 90%;
+      object-fit: contain;
+    }
+
     button {
       margin-top: 10px;
       background-color: #ff69b4;
@@ -79,7 +96,7 @@
       font-weight: bold;
     }
 
-    #logo {
+    #header-logo {
       width: 150px;
       margin-bottom: 20px;
     }
@@ -120,7 +137,6 @@
   <h1 id="title">Парти Бинго 🎉</h1>
 
   <div id="print-area">
-    <img id="logo" src="https://marisa.bg/wp-content/uploads/2019/01/logo.png" alt="Мариса Лого">
     <div id="bingo"></div>
   </div>
 
@@ -165,38 +181,60 @@
       bingo.innerHTML = "";
       document.getElementById('message').textContent = "";
 
-      let shuffled = phrases.sort(() => 0.5 - Math.random()).slice(0, 25);
+      // Разбъркваме фразите и вземаме само 24 (вместо 25, защото средната клетка ще е логото)
+      let shuffled = phrases.sort(() => 0.5 - Math.random()).slice(0, 24);
 
-      shuffled.forEach((text, index) => {
-        const cell = document.createElement('div');
-        cell.className = 'cell';
-        cell.textContent = text;
-        cell.dataset.index = index;
-        cell.onclick = () => {
-          cell.classList.toggle('marked');
-          checkBingo();
-        };
-        bingo.appendChild(cell);
-      });
+      // Създаваме всички клетки, като пропускаме централната клетка (индекс 12)
+      for (let i = 0; i < 25; i++) {
+        if (i === 12) {
+          // Централна клетка с логото
+          const logoCell = document.createElement('div');
+          logoCell.className = 'logo-cell';
+          logoCell.dataset.index = i;
+
+          const logoImg = document.createElement('img');
+          logoImg.src = "https://marisa.bg/wp-content/uploads/2019/01/logo.png";
+          logoImg.alt = "Мариса Лого";
+
+          logoCell.appendChild(logoImg);
+          bingo.appendChild(logoCell);
+        } else {
+          // Нормална клетка с текст
+          const phraseIndex = i > 12 ? i - 1 : i; // Приспособяваме индекса заради пропуснатата централна клетка
+          const cell = document.createElement('div');
+          cell.className = 'cell';
+          cell.textContent = shuffled[phraseIndex];
+          cell.dataset.index = i;
+          cell.onclick = () => {
+            cell.classList.toggle('marked');
+            checkBingo();
+          };
+          bingo.appendChild(cell);
+        }
+      }
     }
 
     function checkBingo() {
-      const cells = document.querySelectorAll('.cell');
-      const marked = Array.from(cells).map(cell => cell.classList.contains('marked'));
+      const cells = document.querySelectorAll('.cell, .logo-cell');
+      const marked = Array.from(cells).map((cell, index) => {
+        // Логото винаги се брои като маркирано
+        if (index === 12) return true;
+        return cell.classList.contains('marked');
+      });
 
       const lines = [
-        [0, 1, 2, 3, 4],
-        [5, 6, 7, 8, 9],
-        [10, 11, 12, 13, 14],
-        [15, 16, 17, 18, 19],
-        [20, 21, 22, 23, 24],
-        [0, 5, 10, 15, 20],
-        [1, 6, 11, 16, 21],
-        [2, 7, 12, 17, 22],
-        [3, 8, 13, 18, 23],
-        [4, 9, 14, 19, 24],
-        [0, 6, 12, 18, 24],
-        [4, 8, 12, 16, 20]
+        [0, 1, 2, 3, 4],       // Хоризонтален ред 1
+        [5, 6, 7, 8, 9],       // Хоризонтален ред 2
+        [10, 11, 12, 13, 14],   // Хоризонтален ред 3 (включва логото на позиция 12)
+        [15, 16, 17, 18, 19],   // Хоризонтален ред 4
+        [20, 21, 22, 23, 24],   // Хоризонтален ред 5
+        [0, 5, 10, 15, 20],     // Вертикален ред 1
+        [1, 6, 11, 16, 21],     // Вертикален ред 2
+        [2, 7, 12, 17, 22],     // Вертикален ред 3 (включва логото на позиция 12)
+        [3, 8, 13, 18, 23],     // Вертикален ред 4
+        [4, 9, 14, 19, 24],     // Вертикален ред 5
+        [0, 6, 12, 18, 24],     // Диагонал от горен ляв до долен десен (включва логото)
+        [4, 8, 12, 16, 20]      // Диагонал от горен десен до долен ляв (включва логото)
       ];
 
       let bingoFound = lines.some(line => line.every(index => marked[index]));
